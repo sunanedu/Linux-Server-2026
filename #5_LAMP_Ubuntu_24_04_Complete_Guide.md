@@ -21,7 +21,7 @@
 11. [การจัดการ Virtual Host (หลายเว็บไซต์)](#11-การจัดการ-virtual-host-หลายเว็บไซต์)
 12. [ทริปและเทคนิคที่ควรรู้](#12-ทริปและเทคนิคที่ควรรู้)
 13. [การแก้ปัญหาที่พบบ่อย](#13-การแก้ปัญหาที่พบบ่อย)
-
+14. ติดตั้ง phpMyAdmin บน Ubuntu 24.04
 ---
 
 ## 1. ทำความเข้าใจ LAMP คืออะไร
@@ -1962,6 +1962,116 @@ sudo ufw status                   # ดู firewall
 ```
 
 ---
+
+
+# 14.ติดตั้ง phpMyAdmin บน Ubuntu 24.04
+
+## 1. อัปเดตแพ็กเกจ
+
+``` bash
+sudo apt update
+sudo apt upgrade -y
+```
+
+## 2. ติดตั้ง phpMyAdmin
+
+``` bash
+sudo apt install phpmyadmin -y
+```
+
+ระหว่างติดตั้ง
+
+-   หากมีหน้าจอ **Choose Web Server**
+    -   เลือก **Apache2**
+    -   กด `Space` เพื่อเลือก
+    -   กด `Tab` แล้วเลือก **OK**
+-   หน้าจอ **Configure database for phpmyadmin with dbconfig-common**
+    -   เลือก **Yes**
+-   ตั้งรหัสผ่านสำหรับ phpMyAdmin
+
+## 3. หาก Apache ไม่ได้สร้างลิงก์อัตโนมัติ
+
+ตรวจสอบ
+
+``` bash
+ls /etc/apache2/conf-enabled/phpmyadmin.conf
+```
+
+ถ้าไม่มี
+
+``` bash
+sudo ln -s /etc/phpmyadmin/apache.conf /etc/apache2/conf-enabled/phpmyadmin.conf
+```
+
+## 4. Restart Apache
+
+``` bash
+sudo systemctl restart apache2
+```
+
+## 5. ตรวจสอบสถานะ
+
+``` bash
+sudo systemctl status apache2
+```
+
+## 6. เปิดใช้งานส่วนขยาย PHP (ถ้ายังไม่ได้ติดตั้ง)
+
+``` bash
+sudo apt install php-mysql php-mbstring php-zip php-gd php-json php-curl php-xml -y
+```
+
+จากนั้น
+
+``` bash
+sudo phpenmod mbstring
+sudo systemctl restart apache2
+```
+
+## 7. เข้าใช้งาน
+
+    http://IP-ADDRESS/phpmyadmin
+
+หรือ
+
+    http://localhost/phpmyadmin
+
+## 8. Login
+
+-   Username: root (หรือบัญชี MySQL)
+-   Password: รหัสผ่าน MySQL
+
+## 9. หาก root เข้าไม่ได้ (Ubuntu ใช้ auth_socket)
+
+สร้างผู้ใช้ใหม่
+
+``` sql
+sudo mysql
+
+CREATE USER 'admin'@'localhost' IDENTIFIED BY 'StrongPassword123!';
+GRANT ALL PRIVILEGES ON *.* TO 'admin'@'localhost' WITH GRANT OPTION;
+FLUSH PRIVILEGES;
+EXIT;
+```
+
+จากนั้น Login ด้วย
+
+-   Username: admin
+-   Password: StrongPassword123!
+
+## 10. ตรวจสอบเวอร์ชัน
+
+``` bash
+php -v
+apache2 -v
+mysql --version
+```
+
+ตรวจสอบ phpMyAdmin
+
+``` bash
+dpkg -l | grep phpmyadmin
+```
 
 ## ข้อมูลอ้างอิง
 
